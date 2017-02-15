@@ -1,22 +1,45 @@
+      subroutine task_to_integer(task, itask)
+        integer :: itask
+        character * 60 :: task
+           SELECT CASE (task)
+           CASE ('START')
+            itask = 0
+           CASE ('NEW_X')
+            itask = 1
+           CASE ('FG_START')
+            itask = 2
+           CASE ('FG_LNSRCH')
+            itask = 3
+           CASE ('RESTART_FROM_LNSRCH')
+            itask = 4
+           CASE ('CONVERGENCE: '//
+     +        'NORM_OF_PROJECTED_GRADIENT_<=_PGTOL')
+            itask = 5
+           CASE ('CONVERGENCE: '//
+     +           'REL_REDUCTION_OF_F_<=_FACTR*EPSMCH')
+            itask = 6
+           CASE ('ABNORMAL_TERMINATION_IN_LNSRCH')
+            itask = 7
+           CASE ('ERROR: N .LE. 0')
+            itask = 8
+           CASE ('ERROR: M .LE. 0')
+            itask = 9
+           CASE ('ERROR: FACTR .LT. 0')
+            itask = 10
+           CASE ('ERROR: INVALID NBD')
+            itask = 11
+           CASE ('ERROR: NO FEASIBLE SOLUTION')
+            itask = 12
+           CASE DEFAULT
+               itask = 13
+           END SELECT
+      end subroutine task_to_integer
 
-      subroutine setulb_wrapper(n, m, x, l, u, nbd, f, g, factr, pgtol,
-     +                         wa, iwa, itask, iprint, icsave,
-     +                         ilsave, isave, dsave) bind(c)
-          use iso_c_binding
-          integer(c_int) :: n, m, nbd(n), iwa(3 * n), iprint, isave(44),
-     +      itask, ilsave(4), icsave
-          real(c_double) :: x(n), l(n), u(n), f, g(n), factr, pgtol,
-     +                      wa(2 * m * n + 5 * n + 11 * m * m + 8 * m),
-     +                      dsave(29)
-          character * 60 :: task, csave
-          logical lsave(4)
+      subroutine integer_to_task(task, itask)
+        integer :: itask
+        character * 60 :: task
 
-          lsave(1) = (ilsave(1) == 1)
-          lsave(2) = (ilsave(2) == 1)
-          lsave(3) = (ilsave(3) == 1)
-          lsave(4) = (ilsave(4) == 1)
-
-         SELECT CASE (itask)
+        SELECT CASE (itask)
              CASE (0)
               task = 'START'
              CASE (1)
@@ -43,46 +66,12 @@
               task =  'ERROR: INVALID NBD'
              CASE (12)
               task =  'ERROR: NO FEASIBLE SOLUTION'
-          END SELECT
+        END SELECT
+      end subroutine integer_to_task
 
-          SELECT CASE (icsave)
-            CASE (0)
-             csave = 'START'
-            CASE (1)
-             csave = 'FG'
-            CASE (2)
-             csave = 'CONVERGENCE'
-            CASE (3)
-             csave = 'WARNING: ROUNDING ERRORS PREVENT PROGRESS'
-            CASE (4)
-             csave = 'WARNING: XTOL TEST SATISFIED'
-            CASE (5)
-             csave = 'WARNING: STP = STPMAX'
-            CASE (6)
-             csave = 'WARNING: STP = STPMIN'
-            CASE (7)
-             csave = 'ERROR: STP .LT. STPMIN'
-            CASE (8)
-             csave = 'ERROR: STP .GT. STPMAX'
-            CASE (9)
-             csave = 'ERROR: INITIAL G .GE. ZERO'
-            CASE (10)
-             csave = 'ERROR: FTOL .LT. ZERO'
-            CASE (11)
-             csave = 'ERROR: GTOL .LT. ZERO'
-            CASE (12)
-             csave = 'ERROR: XTOL .LT. ZERO'
-            CASE (13)
-             csave = 'ERROR: STPMIN .LT. ZERO'
-            CASE (14)
-             csave = 'ERROR: STPMAX .LT. STPMIN'
-            END SELECT
-
-
-          call setulb(n, m, x, l, u, nbd, f, g, factr, pgtol,
-     +           wa, iwa, task, iprint, csave,
-     +           lsave, isave, dsave)
-
+      subroutine csave_to_integer(csave, icsave)
+        integer :: icsave
+        character * 60 :: csave
         SELECT CASE(csave)
           CASE ('START')
            icsave = 0
@@ -120,7 +109,72 @@ c             This case should never happen
 c             checked later in cpp using assert
              icsave = 15
           END SELECT
+      end subroutine csave_to_integer
 
+      subroutine integer_to_csave(csave, icsave)
+        integer :: icsave
+        character * 60 :: csave
+                  SELECT CASE (icsave)
+                    CASE (0)
+                     csave = 'START'
+                    CASE (1)
+                     csave = 'FG'
+                    CASE (2)
+                     csave = 'CONVERGENCE'
+                    CASE (3)
+                     csave = 'WARNING: ROUNDING ERRORS PREVENT PROGRESS'
+                    CASE (4)
+                     csave = 'WARNING: XTOL TEST SATISFIED'
+                    CASE (5)
+                     csave = 'WARNING: STP = STPMAX'
+                    CASE (6)
+                     csave = 'WARNING: STP = STPMIN'
+                    CASE (7)
+                     csave = 'ERROR: STP .LT. STPMIN'
+                    CASE (8)
+                     csave = 'ERROR: STP .GT. STPMAX'
+                    CASE (9)
+                     csave = 'ERROR: INITIAL G .GE. ZERO'
+                    CASE (10)
+                     csave = 'ERROR: FTOL .LT. ZERO'
+                    CASE (11)
+                     csave = 'ERROR: GTOL .LT. ZERO'
+                    CASE (12)
+                     csave = 'ERROR: XTOL .LT. ZERO'
+                    CASE (13)
+                     csave = 'ERROR: STPMIN .LT. ZERO'
+                    CASE (14)
+                     csave = 'ERROR: STPMAX .LT. STPMIN'
+                    END SELECT
+      end subroutine integer_to_csave
+
+      subroutine setulb_wrapper(n, m, x, l, u, nbd, f, g, factr, pgtol,
+     +                         wa, iwa, itask, iprint, icsave,
+     +                         ilsave, isave, dsave) bind(c)
+          use iso_c_binding
+          integer(c_int) :: n, m, nbd(n), iwa(3 * n), iprint, isave(44),
+     +      itask, ilsave(4), icsave
+          real(c_double) :: x(n), l(n), u(n), f, g(n), factr, pgtol,
+     +                      wa(2 * m * n + 5 * n + 11 * m * m + 8 * m),
+     +                      dsave(29)
+          character * 60 :: task, csave
+          logical lsave(4)
+
+          lsave(1) = (ilsave(1) == 1)
+          lsave(2) = (ilsave(2) == 1)
+          lsave(3) = (ilsave(3) == 1)
+          lsave(4) = (ilsave(4) == 1)
+
+          call integer_to_task(task, itask)
+          call integer_to_csave(csave, icsave)
+
+
+          call setulb(n, m, x, l, u, nbd, f, g, factr, pgtol,
+     +           wa, iwa, task, iprint, csave,
+     +           lsave, isave, dsave)
+
+           call task_to_integer(task, itask)
+           call csave_to_integer(csave, icsave)
 
           if (lsave(1)) then
            ilsave(1) = 1
@@ -142,40 +196,6 @@ c             checked later in cpp using assert
           else
             ilsave(4) = 0
           endif
-
-           SELECT CASE (task)
-           CASE ('START')
-            itask = 0
-           CASE ('NEW_X')
-            itask = 1
-           CASE ('FG_START')
-            itask = 2
-           CASE ('FG_LNSRCH')
-            itask = 3
-           CASE ('RESTART_FROM_LNSRCH')
-            itask = 4
-           CASE ('CONVERGENCE: '//
-     +        'NORM_OF_PROJECTED_GRADIENT_<=_PGTOL')
-            itask = 5
-           CASE ('CONVERGENCE: '//
-     +           'REL_REDUCTION_OF_F_<=_FACTR*EPSMCH')
-            itask = 6
-           CASE ('ABNORMAL_TERMINATION_IN_LNSRCH')
-            itask = 7
-           CASE ('ERROR: N .LE. 0')
-            itask = 8
-           CASE ('ERROR: M .LE. 0')
-            itask = 9
-           CASE ('ERROR: FACTR .LT. 0')
-            itask = 10
-           CASE ('ERROR: INVALID NBD')
-            itask = 11
-           CASE ('ERROR: NO FEASIBLE SOLUTION')
-            itask = 12
-           CASE DEFAULT
-               itask = 13
-           END SELECT
-
       end subroutine setulb_wrapper
 
 c
