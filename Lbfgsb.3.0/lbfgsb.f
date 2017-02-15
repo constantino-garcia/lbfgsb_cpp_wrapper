@@ -150,52 +150,40 @@ c             checked later in cpp using assert
 
       subroutine setulb_wrapper(n, m, x, l, u, nbd, f, g, factr, pgtol,
      +                         wa, iwa, itask, iprint, icsave,
-     +                         ilsave, isave, dsave) bind(c)
+     +                         lsave0, lsave1, lsave2, lsave3,
+     +                         isave, dsave, test) bind(c)
           use iso_c_binding
           integer(c_int) :: n, m, nbd(n), iwa(3 * n), iprint, isave(44),
-     +      itask, ilsave(4), icsave
+     +      itask, icsave
           real(c_double) :: x(n), l(n), u(n), f, g(n), factr, pgtol,
      +                      wa(2 * m * n + 5 * n + 11 * m * m + 8 * m),
      +                      dsave(29)
           character * 60 :: task, csave
+          logical(c_bool) :: lsave0, lsave1, lsave2, lsave3
           logical lsave(4)
 
-          lsave(1) = (ilsave(1) == 1)
-          lsave(2) = (ilsave(2) == 1)
-          lsave(3) = (ilsave(3) == 1)
-          lsave(4) = (ilsave(4) == 1)
+            PRINT *, test
 
+          lsave(1) = lsave0
+          lsave(2) = lsave1
+          lsave(3) = lsave2
+          lsave(4) = lsave3
           call integer_to_task(task, itask)
           call integer_to_csave(csave, icsave)
-
 
           call setulb(n, m, x, l, u, nbd, f, g, factr, pgtol,
      +           wa, iwa, task, iprint, csave,
      +           lsave, isave, dsave)
 
-           call task_to_integer(task, itask)
-           call csave_to_integer(csave, icsave)
+          lsave0 = lsave(1)
+          lsave1 = lsave(2)
+          lsave2 = lsave(3)
+          lsave3 = lsave(4)
 
-          if (lsave(1)) then
-           ilsave(1) = 1
-          else
-            ilsave(1) = 0
-          endif
-          if (lsave(2)) then
-           ilsave(2) = 1
-          else
-            ilsave(2) = 0
-          endif
-          if (lsave(3)) then
-           ilsave(3) = 1
-          else
-            ilsave(3) = 0
-          endif
-          if (lsave(4)) then
-           ilsave(4) = 1
-          else
-            ilsave(4) = 0
-          endif
+          call task_to_integer(task, itask)
+          call csave_to_integer(csave, icsave)
+
+
       end subroutine setulb_wrapper
 
 c

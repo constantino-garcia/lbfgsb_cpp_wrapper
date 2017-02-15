@@ -7,7 +7,8 @@
 extern "C" {
 void setulb_wrapper(int *n, int *m, double x[], double l[], double u[], int nbd[], double *f,
                     double g[], double *factr, double *pgtol, double wa[], int iwa[], int *itask,
-                    int *iprint, int *icsave, int lsave[], int isave[], double dsave[]);
+                    int *iprint, int *icsave, bool* lsave0, bool* lsave1, bool* lsave2, bool* lsave3,
+                    int isave[], double dsave[]);
 }
 
 template<class T>
@@ -123,6 +124,8 @@ public:
         int itask = 0;
         int icsave = 0;
 
+        bool test = false;
+
         while ((i < mMaximumNumberOfIterations) && (
                 (itask == 0) || (itask == 1) || (itask == 2) || (itask == 3)
         )) {
@@ -130,7 +133,8 @@ public:
                            &mGradient[0],
                            &mMachinePrecisionFactor, &mProjectedGradientTolerance,
                            &mWorkArray[0], &mIntWorkArray[0], &itask, &mVerboseLevel,
-                           &icsave, &mBoolInformation[0],
+                           &icsave, &mBoolInformation[0], &mBoolInformation[1],
+                           &mBoolInformation[2], &mBoolInformation[3],
                            &mIntInformation[0], &mDoubleInformation[0]);
             // assert that impossible values do not occur
             assert(icsave <= 14 && icsave >= 0);
@@ -160,7 +164,7 @@ private:
     char mTask[60];
     char mCharInformation[60];
     // Use ints to model boolean information to avoid problems with the Fortran-C++ binding
-    int mBoolInformation[4];
+    bool mBoolInformation[4];
     int mIntInformation[44];
     double mDoubleInformation[29];
 
