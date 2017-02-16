@@ -112,7 +112,6 @@ public:
             } else {
                 mNbd[i] = 0;
             }
-            std::cout << mNbd[i] << ", ";
         }
 
         double f = pb(x0);

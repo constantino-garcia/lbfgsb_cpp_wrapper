@@ -151,7 +151,7 @@ c             checked later in cpp using assert
       subroutine setulb_wrapper(n, m, x, l, u, nbd, f, g, factr, pgtol,
      +                         wa, iwa, itask, iprint, icsave,
      +                         lsave0, lsave1, lsave2, lsave3,
-     +                         isave, dsave, test) bind(c)
+     +                         isave, dsave) bind(c)
           use iso_c_binding
           integer(c_int) :: n, m, nbd(n), iwa(3 * n), iprint, isave(44),
      +      itask, icsave
@@ -161,8 +161,6 @@ c             checked later in cpp using assert
           character * 60 :: task, csave
           logical(c_bool) :: lsave0, lsave1, lsave2, lsave3
           logical lsave(4)
-
-            PRINT *, test
 
           lsave(1) = lsave0
           lsave(2) = lsave1
