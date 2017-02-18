@@ -22,8 +22,10 @@ public:
     }
 
     void gradient(const T &x, T &gr) {
+        if (gr.size() != this->mInputDimension) {
+            throw std::invalid_argument("gradient size does not match input dimension");
+        }
         double epsilon = 1e-3;
-        gr.resize(this->mInputDimension);
         gr[0] = epsilon * (400 * (std::pow(x[0], 3.0) - x[1] * x[0]) + 2 * (x[0] - 1));
         for (int i = 1; i < (this->mInputDimension - 1); ++i) {
             gr[i] = epsilon * (200 * (x[i] - std::pow(x[i - 1], 2.0)) +
@@ -50,14 +52,16 @@ public:
     }
 
     void gradient(const T &x, T &gr) {
-        gr.resize(this->mInputDimension);
+        if (gr.size() != this->mInputDimension) {
+            throw std::invalid_argument("gradient size does not match input dimension");
+        }
         double epsilon = 1e-3;
         gr[0] = epsilon * (2 * (1.5 - x[0] + x[0] * x[1]) * (-1 + x[1]) +
-                2 * (2.25 - x[0] + x[0] * std::pow(x[1], 2)) * (-1 + std::pow(x[1], 2)) +
-                2 * (2.625 - x[0] + x[0] * std::pow(x[1], 3)) * (-1 + std::pow(x[1], 3)) );
+                           2 * (2.25 - x[0] + x[0] * std::pow(x[1], 2)) * (-1 + std::pow(x[1], 2)) +
+                           2 * (2.625 - x[0] + x[0] * std::pow(x[1], 3)) * (-1 + std::pow(x[1], 3)));
         gr[1] = epsilon * (2 * (1.5 - x[0] + x[0] * x[1]) * x[0] +
-                2 * (2.25 - x[0] + x[0] * std::pow(x[1], 2)) * 2 * x[0] * x[1] +
-                2 * (2.625 - x[0] + x[0] * std::pow(x[1], 3)) * 3 * x[0] * std::pow(x[1], 2));
+                           2 * (2.25 - x[0] + x[0] * std::pow(x[1], 2)) * 2 * x[0] * x[1] +
+                           2 * (2.625 - x[0] + x[0] * std::pow(x[1], 3)) * 3 * x[0] * std::pow(x[1], 2));
     }
 };
 
@@ -77,7 +81,9 @@ public:
     }
 
     void gradient(const T &xx, T &gr) {
-        gr.resize(this->mInputDimension);
+        if (gr.size() != this->mInputDimension) {
+            throw std::invalid_argument("gradient size does not match input dimension");
+        }
         double x = xx[0];
         double y = xx[1];
         double epsilon = 1e-3;
@@ -110,10 +116,12 @@ public:
     }
 
     void gradient(const T &x, T &gr) {
-        gr.resize(this->mInputDimension);
+        if (gr.size() != this->mInputDimension) {
+            throw std::invalid_argument("gradient size does not match input dimension");
+        }
         double epsilon = 1e-3;
-        gr[0] = epsilon * ( 2 * (x[0] + 2 * x[1] - 7) + 4 * (2 * x[0] + x[1] - 5) );
-        gr[1] = epsilon * (4 * (x[0] + 2 * x[1] - 7) + 2 * (2 * x[0] + x[1] - 5) );
+        gr[0] = epsilon * (2 * (x[0] + 2 * x[1] - 7) + 4 * (2 * x[0] + x[1] - 5));
+        gr[1] = epsilon * (4 * (x[0] + 2 * x[1] - 7) + 2 * (2 * x[0] + x[1] - 5));
     }
 };
 
@@ -130,7 +138,9 @@ public:
     }
 
     void gradient(const T &x, T &gr) {
-        gr.resize(this->mInputDimension);
+        if (gr.size() != this->mInputDimension) {
+            throw std::invalid_argument("gradient size does not match input dimension");
+        }
         gr[0] = 0.26 * 2 * x[0] - 0.48 * x[1];
         gr[1] = 0.26 * 2 * x[1] - 0.48 * x[0];
     }

@@ -22,12 +22,13 @@ public:
 
     }
 
+    //TODO: add checks for memory size, etc.
     // Typical values for machinePrecisionFactor : 1e+12 for
     // low accuracy; 1e+7 for moderate accuracy; 1e+1 for extremely
     // high accuracy.
     l_bfgs_b(int memorySize, int maximumNumberOfIterations,
              double machinePrecisionFactor, double projectedGradientTolerance)
-    : mMemorySize(memorySize),
+    :       mMemorySize(memorySize),
             mMaximumNumberOfIterations(maximumNumberOfIterations),
             mMachinePrecisionFactor(machinePrecisionFactor),
             mProjectedGradientTolerance(projectedGradientTolerance),
@@ -41,10 +42,7 @@ public:
     }
 
     void setMemorySize(int memorySize) {
-        // TODO: check if 1 is a valid input
-        if (memorySize <= 1) {
-            throw std::invalid_argument("memorySize should be > 1");
-        }
+        check_memory_size(memorySize);
         mMemorySize = memorySize;
     }
 
@@ -115,7 +113,9 @@ public:
         }
 
         double f = pb(x0);
-        T gr;
+        // use x0 to initialize gr with the proper dimensions without
+        // dealing with Templates
+        T gr(x0);
         pb.gradient(x0, gr);
         fill_pointer(mGradient, gr, n);
 
@@ -178,6 +178,12 @@ private:
     void fill_pointer(std::vector<double>& out, const T &in, int n) {
         for (int i = 0; i < n; ++i) {
             out[i] = in[i];
+        }
+    }
+
+    static void check_memory_size(int memorySize) {
+        if (memorySize < 1) {
+            throw std::invalid_argument("memorySize should be >= 1");
         }
     }
 };

@@ -28,6 +28,9 @@
 *.out
 *.app
 
+# Others
+*.cbp
+
 # IDE
 .idea/
 cmake-build-debug/
