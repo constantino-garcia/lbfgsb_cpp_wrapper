@@ -15,7 +15,7 @@ ENDIF()
 INCLUDE_DIRECTORIES("${EIGEN3_INCLUDE_DIR}")
 
 set(SOURCE_FILES l_bfgs_b_example.cpp include/problem.h Lbfgsb.3.0/blas.f Lbfgsb.3.0/lbfgsb.f Lbfgsb.3.0/linpack.f Lbfgsb.3.0/timer.f
-                 l_bfgs_b.h tests/src/test_functions.h)
+        include/l_bfgs_b.h tests/src/test_functions.h)
 
 add_executable(example ${SOURCE_FILES})
 target_link_libraries(example ${ARMADILLO_LIBRARIES})

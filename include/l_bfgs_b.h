@@ -2,8 +2,7 @@
 #define L_BFGS_B_CPP_WRAPPER_H
 
 #include <cassert>
-#include <a.out.h>
-#include "include/problem.h"
+#include "problem.h"
 
 extern "C" {
 void setulb_wrapper(int *n, int *m, double x[], double l[], double u[], int nbd[], double *f,
@@ -23,7 +22,6 @@ public:
 
     }
 
-    //TODO: add checks for memory size, etc.
     // Typical values for machinePrecisionFactor : 1e+12 for
     // low accuracy; 1e+7 for moderate accuracy; 1e+1 for extremely
     // high accuracy.

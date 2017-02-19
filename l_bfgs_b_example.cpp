@@ -1,8 +1,8 @@
 #include <iostream>
 #include <armadillo>
-#include "tests/src/test_functions.h"
-#include "l_bfgs_b.h"
 #include <Eigen/Dense>
+#include "tests/src/test_functions.h"
+#include "include/l_bfgs_b.h"
 
 using namespace std;
 
