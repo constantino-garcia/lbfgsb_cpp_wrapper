@@ -114,8 +114,10 @@ private:
 public:
     problem(int inputDimension, const std::array<U, N> &lowerBound, const std::array<U, N> &upperBound) :
             base() {
-        this->check_container_dimensions(N, inputDimension);
+        this->check_input_dimension(inputDimension);
         this->mInputDimension = inputDimension;
+        this->check_container_dimensions(N, inputDimension);
+        this->check_bounds(lowerBound,upperBound);
         this->mLowerBound = lowerBound;
         this->mUpperBound = upperBound;
     }
