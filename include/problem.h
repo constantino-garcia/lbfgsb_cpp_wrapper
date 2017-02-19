@@ -2,6 +2,7 @@
 #define LBFGSB_ADAPTER_PROBLEM_H
 
 #include <array>
+#include <limits>
 
 // Use the Curiosly repeating pattern to avoid code duplication
 template<typename T, typename derived>

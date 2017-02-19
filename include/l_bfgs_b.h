@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include "problem.h"
+#include <vector>
 
 extern "C" {
 void setulb_wrapper(int *n, int *m, double x[], double l[], double u[], int nbd[], double *f,

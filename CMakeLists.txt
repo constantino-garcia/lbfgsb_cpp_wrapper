@@ -15,12 +15,12 @@ ENDIF()
 file(GLOB FORTRAN_SRC
         "Lbfgsb.3.0/*.f"
         )
-set(SOURCE_FILES l_bfgs_b_example.cpp ${FORTRAN_SRC})
+set(FULL_SOURCE_FILES full_example.cpp ${FORTRAN_SRC})
 
-add_executable(example ${SOURCE_FILES})
-target_include_directories(example PUBLIC ${ARMADILLO_INCLUDE_DIRS})
-target_include_directories(example PUBLIC ${EIGEN3_INCLUDE_DIR})
-target_link_libraries(example ${ARMADILLO_LIBRARIES})
+add_executable(full_example ${FULL_SOURCE_FILES})
+target_include_directories(full_example PUBLIC ${ARMADILLO_INCLUDE_DIRS})
+target_include_directories(full_example PUBLIC ${EIGEN3_INCLUDE_DIR})
+target_link_libraries(full_example ${ARMADILLO_LIBRARIES})
 
 # add tests
 add_subdirectory(tests)
