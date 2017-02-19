@@ -12,7 +12,7 @@ int main() {
     beale.set_lower_bound({-4.5, -4.5});
     beale.set_upper_bound({4.5, 4.5});
     l_bfgs_b<std::array<double, 2> > arraySolver(5);
-    arraySolver.setVerboseLevel(-1);
+    arraySolver.set_verbose_level(-1);
     std::array<double, 2> arrayX = {-1, 0};
     arraySolver.optimize(beale, arrayX);
     std::cout << "MINIMUM LOCATED AT : (" << arrayX[0] << ", " << arrayX[1] << ")" << std::endl << std::endl;
@@ -22,7 +22,7 @@ int main() {
     bl.set_lower_bound({-2, -2});
     bl.set_upper_bound({5, 4});
     l_bfgs_b<std::vector<double> > stdSolver(5);
-    stdSolver.setVerboseLevel(-1);
+    stdSolver.set_verbose_level(-1);
     std::vector<double> stdX = {-1, 2};
     stdSolver.optimize(bl, stdX);
     std::cout << "MINIMUM LOCATED AT : (" << stdX[0] << ", " << stdX[1] << ")" << std::endl << std::endl;
@@ -32,7 +32,7 @@ int main() {
     gold.set_lower_bound({-2, -2});
     gold.set_upper_bound({2, 2});
     l_bfgs_b<arma::vec> armaSolver(5);
-    armaSolver.setVerboseLevel(-1);
+    armaSolver.set_verbose_level(-1);
     arma::vec armaX = {-1, 1.5};
     armaSolver.optimize(gold, armaX);
     std::cout << "MINIMUM LOCATED AT : (" << armaX[0] << ", " << armaX[1] << ")" << std::endl << std::endl;
@@ -45,15 +45,15 @@ int main() {
     matyas.set_lower_bound(lb);
     matyas.set_upper_bound(ub);
     l_bfgs_b<Eigen::VectorXd> eigenSolver(5);
-    eigenSolver.setVerboseLevel(-1);
+    eigenSolver.set_verbose_level(-1);
     eigenX << 8, -8;
     eigenSolver.optimize(matyas, eigenX);
     std::cout << "MINIMUM LOCATED AT : (" << eigenX[0] << ", " << eigenX[1] << ")" << std::endl << std::endl;
 
     // It is possible to modify the L-BFGS-B parameters
     std::cout << "*** MINIMIZING ROSENBROCK ***" << std::endl;
-    armaSolver.setVerboseLevel(0);
-    armaSolver.setMachinePrecisionFactor(1e2);
+    armaSolver.set_verbose_level(0);
+    armaSolver.set_machine_precision_factor(1e2);
     rosenbrock_function<arma::vec> rf(3);
     rf.set_lower_bound({-10, -10, -10});
     rf.set_upper_bound({10, 10, 10});

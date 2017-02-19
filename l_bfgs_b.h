@@ -2,23 +2,24 @@
 #define L_BFGS_B_CPP_WRAPPER_H
 
 #include <cassert>
+#include <a.out.h>
 #include "include/problem.h"
 
 extern "C" {
 void setulb_wrapper(int *n, int *m, double x[], double l[], double u[], int nbd[], double *f,
                     double g[], double *factr, double *pgtol, double wa[], int iwa[], int *itask,
-                    int *iprint, int *icsave, bool* lsave0, bool* lsave1, bool* lsave2, bool* lsave3,
+                    int *iprint, int *icsave, bool *lsave0, bool *lsave1, bool *lsave2, bool *lsave3,
                     int isave[], double dsave[]);
 }
 
 template<class T>
 class l_bfgs_b {
 public:
-    l_bfgs_b(): l_bfgs_b(5) {
+    l_bfgs_b() : l_bfgs_b(5) {
 
     };
 
-    l_bfgs_b(int memorySize): l_bfgs_b(memorySize, 500, 1e7, 1e-15) {
+    l_bfgs_b(int memorySize) : l_bfgs_b(memorySize, 500, 1e7, 1e-9) {
 
     }
 
@@ -28,57 +29,65 @@ public:
     // high accuracy.
     l_bfgs_b(int memorySize, int maximumNumberOfIterations,
              double machinePrecisionFactor, double projectedGradientTolerance)
-    :       mMemorySize(memorySize),
-            mMaximumNumberOfIterations(maximumNumberOfIterations),
-            mMachinePrecisionFactor(machinePrecisionFactor),
-            mProjectedGradientTolerance(projectedGradientTolerance),
-            mVerboseLevel(-1) {
+        // note the use of the , operator to check the correctness of the parameters
+        : mMemorySize((check_memory_size(memorySize), memorySize)),
+          mMaximumNumberOfIterations((check_max_iterations(maximumNumberOfIterations), maximumNumberOfIterations)),
+          mMachinePrecisionFactor((check_precision_factor(machinePrecisionFactor), machinePrecisionFactor)),
+          mProjectedGradientTolerance((check_gradient_tolerance(projectedGradientTolerance),
+                  projectedGradientTolerance)),
+          mVerboseLevel(-1) {
     }
 
     ~l_bfgs_b() = default;
 
-    int getMemorySize() const {
+    int get_memory_size() const {
         return mMemorySize;
     }
 
-    void setMemorySize(int memorySize) {
+    void set_memory_size(int memorySize) {
         check_memory_size(memorySize);
         mMemorySize = memorySize;
     }
 
-    double getMachinePrecisionFactor() const {
+    int get_max_iterations() const {
+        return mMaximumNumberOfIterations;
+    }
+
+    void set_max_iterations(int maximumNumberOfIterations) {
+        check_max_iterations(maximumNumberOfIterations);
+        mMaximumNumberOfIterations = maximumNumberOfIterations;
+    }
+
+    double get_machine_precision_factor() const {
         return mMachinePrecisionFactor;
     }
 
-    void setMachinePrecisionFactor(double machinePrecisionFactor) {
-        if (machinePrecisionFactor <= 0) {
-            throw std::invalid_argument("machinePrecisionFactor should be > 0");
-        }
+    void set_machine_precision_factor(double machinePrecisionFactor) {
+        check_precision_factor(machinePrecisionFactor);
         mMachinePrecisionFactor = machinePrecisionFactor;
     }
 
-    double getProjectedGradientTolerance() const {
+    double get_projected_gradient_tolerance() const {
         return mProjectedGradientTolerance;
     }
 
-    void setProjectedGradientTolerance(double projectedGradientTolerance) {
+    void set_projected_gradient_tolerance(double projectedGradientTolerance) {
+        check_gradient_tolerance(projectedGradientTolerance);
         mProjectedGradientTolerance = projectedGradientTolerance;
     }
 
-    int getVerboseLevel() const {
+    int get_verbose_level() const {
         return mVerboseLevel;
     }
 
-    void setVerboseLevel(int verboseLevel) {
+    void set_verbose_level(int verboseLevel) {
         // TODO: discretize verboseLevel as enum class
         mVerboseLevel = verboseLevel;
     }
 
-    void optimize(problem<T>& pb, T &x0) {
+    void optimize(problem<T> &pb, T &x0) {
         int n = pb.getInputDimension();
         // prepare variables for the algorithm
-        std::vector<double> mX(n);
-        std::vector<double> mGradient(n);
         std::vector<double> mLowerBound(n);
         std::vector<double> mUpperBound(n);
         std::vector<int> mNbd(n);
@@ -90,7 +99,6 @@ public:
         T upperBound = pb.get_upper_bound();
         bool hasLowerBound, hasUpperBound;
         for (int i = 0; i < n; ++i) {
-            mX[i] = x0[i];
             mLowerBound[i] = lowerBound[i];
             mUpperBound[i] = upperBound[i];
             hasLowerBound = !std::isinf(mLowerBound[i]);
@@ -117,7 +125,6 @@ public:
         // dealing with Templates
         T gr(x0);
         pb.gradient(x0, gr);
-        fill_pointer(mGradient, gr, n);
 
         int i = 0;
         int itask = 0;
@@ -128,8 +135,8 @@ public:
         while ((i < mMaximumNumberOfIterations) && (
                 (itask == 0) || (itask == 1) || (itask == 2) || (itask == 3)
         )) {
-            setulb_wrapper(&n, &mMemorySize, &mX[0], &mLowerBound[0], &mUpperBound[0], &mNbd[0], &f,
-                           &mGradient[0],
+            setulb_wrapper(&n, &mMemorySize, &x0[0], &mLowerBound[0], &mUpperBound[0], &mNbd[0], &f,
+                           &gr[0],
                            &mMachinePrecisionFactor, &mProjectedGradientTolerance,
                            &mWorkArray[0], &mIntWorkArray[0], &itask, &mVerboseLevel,
                            &icsave, &mBoolInformation[0], &mBoolInformation[1],
@@ -139,19 +146,15 @@ public:
             assert(icsave <= 14 && icsave >= 0);
             assert(itask <= 12 && itask >= 0);
 
-            fill_container(mX, x0, n);
-            
             if (itask == 2 || itask == 3) {
                 f = pb(x0);
                 pb.gradient(x0, gr);
-                fill_pointer(mGradient, gr, n);
             }
-            
+
             i = mIntInformation[29];
         }
 
     }
-
 
 private:
     int mMemorySize;
@@ -160,30 +163,31 @@ private:
     int mVerboseLevel;
     int mMaximumNumberOfIterations;
     // interface to Fortran code
-    char mTask[60];
-    char mCharInformation[60];
-    // Use ints to model boolean information to avoid problems with the Fortran-C++ binding
     bool mBoolInformation[4];
     int mIntInformation[44];
     double mDoubleInformation[29];
 
-    // TODO: remove the fill_XXX functions
-    // the array and the container should have the proper dimensions
-    // there is no resizing inside these functions for efficiency
-    void fill_container(const std::vector<double>& in, T &out, int n) {
-        for (int i = 0; i < n; ++i) {
-            out[i] = in[i];
-        }
-    }
-    void fill_pointer(std::vector<double>& out, const T &in, int n) {
-        for (int i = 0; i < n; ++i) {
-            out[i] = in[i];
-        }
-    }
-
     static void check_memory_size(int memorySize) {
         if (memorySize < 1) {
             throw std::invalid_argument("memorySize should be >= 1");
+        }
+    }
+
+    static void check_max_iterations(int maximumNumberOfIterations) {
+        if (maximumNumberOfIterations < 1) {
+            throw std::invalid_argument("maximumNumberOfIterations should be >= 1");
+        }
+    }
+
+    static void check_precision_factor(double machinePrecisionFactor) {
+        if (machinePrecisionFactor <= 0) {
+            throw std::invalid_argument("machinePrecisionFactor should be > 0");
+        }
+    }
+
+    static void check_gradient_tolerance(double projectedGradientTolerance) {
+        if (projectedGradientTolerance < 0) {
+            throw std::invalid_argument("projectedGradientTolerance should be >= 0");
         }
     }
 };
