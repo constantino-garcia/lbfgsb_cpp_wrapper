@@ -25,6 +25,8 @@ public:
         if (gr.size() != this->mInputDimension) {
             throw std::invalid_argument("gradient size does not match input dimension");
         }
+        // resize the gradient to avoid positive increments of the functions
+        // TODO: include in the l_bgsg_b solver
         double epsilon = 1e-3;
         gr[0] = epsilon * (400 * (std::pow(x[0], 3.0) - x[1] * x[0]) + 2 * (x[0] - 1));
         for (int i = 1; i < (this->mInputDimension - 1); ++i) {

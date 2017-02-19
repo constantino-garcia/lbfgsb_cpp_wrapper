@@ -34,3 +34,4 @@
 # IDE
 .idea/
 cmake-build-debug/
+CMakeFiles/
