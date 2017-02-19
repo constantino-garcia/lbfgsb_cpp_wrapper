@@ -1,14 +1,14 @@
 # L-BFGS-B wrapper for C++
-*lbfgsb_cpp_wrapper* is a simple C++ wrapper around the original [Fortran
+`lbfgsb_cpp_wrapper` is a simple C++ wrapper around the original [Fortran
 L-BGSG-B routine](http://users.iems.northwestern.edu/~nocedal/lbfgsb.html), one
 of the most widely-used limited-memory quasi-Newton algorithms for
 bound-constrained optimization. It tries to be compatible with all king of modern vector-like containers, like [std::vector](http://en.cppreference.com/w/cpp/container/vector), [std::array](http://en.cppreference.com/w/cpp/container/array), [armadillo](http://arma.sourceforge.net/docs.html) vectors or 
 [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) vectors.
 
 ## A quick example
-A simple example may be found under the `simple_example* folde`. We give a short overview of the keys steps required to get your code running.
+A simple example may be found under the `simple_example` folder. We give a short overview of the keys steps required to get your code running.
 
-The required files to use the `l_bfgs_b` wrapper class can be found under the *include* directory (C++ files) and the `Lbfgsb.3.0` directory (Fortran files). To specify the problem to be optimized you need to implement a tiny class extending the templated-class `problem`, which can be found under the `include` directory.
+The files required to use the `l_bfgs_b` wrapper class are located under the *include* directory (C++ files) and the `Lbfgsb.3.0` directory (Fortran files). To specify the problem to be optimized you need to implement a tiny class extending the templated-class `problem`, which can be found under the `include` directory.
 
 ```c++
 template<class T>
