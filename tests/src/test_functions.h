@@ -149,5 +149,26 @@ public:
 };
 
 
+template <class T>
+class simple_quadratic_problem : public problem<T> {
+public:
+    simple_quadratic_problem(int inputDimension) : problem<T>(inputDimension) {}
+
+    simple_quadratic_problem(int inputDimension, const T& lb, const T& ub)
+            : problem<T>(inputDimension, lb, ub) {}
+
+    double operator()(const T& x) {
+        return std::accumulate(std::begin(x), std::end(x), 0,
+                               [](double acc, double value) {
+                                   return acc + value * value;
+                               });
+    }
+
+    void gradient(const T& x, T& gr) {
+        std::transform(x.begin(), x.end(), gr.begin(),
+                       [](double value) { return 2 * value; });
+    }
+
+};
 #endif //L_BFGS_B_CPP_WRAPPER_TEST_FUNCTIONS_H
 

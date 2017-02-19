@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "test_functions.h"
 #include "../../include/l_bfgs_b.h"
+#include "test_utils.h"
 #include <vector>
 #include <armadillo>
 #include <Eigen/Dense>
@@ -50,10 +51,8 @@ protected:
     l_bfgs_b< std::array<U,N> > mSolver;
 };
 
-
 using testing::Types;
 typedef Types<std::vector<double>, arma::vec, Eigen::VectorXd, std::array<double, 2> > Implementations;
-
 
 TYPED_TEST_CASE(l_bfgs_b_test, Implementations);
 
@@ -67,9 +66,7 @@ TYPED_TEST(l_bfgs_b_test, rosenbrock) {
     func.set_lower_bound(lb);
     func.set_upper_bound(ub);
     this->mSolver.optimize(func, x);
-    for (int i = 0; i < sol.size(); ++i) {
-        ASSERT_NEAR(sol[i], x[i], 1e-5);
-    }
+    EXPECT_NEAR_VECTORS(sol, x);
 }
 
 TYPED_TEST(l_bfgs_b_test, beale) {
@@ -81,27 +78,21 @@ TYPED_TEST(l_bfgs_b_test, beale) {
     func.set_lower_bound(lb);
     func.set_upper_bound(ub);
     this->mSolver.optimize(func, x);
-    for (int i = 0; i < sol.size(); ++i) {
-        ASSERT_NEAR(sol[i], x[i], 1e-5);
-    }
-}
+    EXPECT_NEAR_VECTORS(sol, x);
 
+}
 
 TYPED_TEST(l_bfgs_b_test, booth) {
     booth_function<TypeParam> func;
-    TypeParam x = this->fill_proper_container({8,9.7});
-    TypeParam sol = this->fill_proper_container({1,3});
-    TypeParam lb = this->fill_proper_container({-10,-10});
-    TypeParam ub = this->fill_proper_container({10,10});
+    TypeParam x = this->fill_proper_container({8, 9.7});
+    TypeParam sol = this->fill_proper_container({1, 3});
+    TypeParam lb = this->fill_proper_container({-10, -10});
+    TypeParam ub = this->fill_proper_container({10, 10});
     func.set_lower_bound(lb);
     func.set_upper_bound(ub);
     this->mSolver.optimize(func, x);
-    for (int i = 0; i < sol.size(); ++i) {
-        ASSERT_NEAR(sol[i], x[i], 1e-5);
-    }
+    EXPECT_NEAR_VECTORS(sol, x);
 }
-
-
 
 TYPED_TEST(l_bfgs_b_test, matyas) {
     matyas_function<TypeParam> func;
@@ -112,7 +103,5 @@ TYPED_TEST(l_bfgs_b_test, matyas) {
     func.set_lower_bound(lb);
     func.set_upper_bound(ub);
     this->mSolver.optimize(func, x);
-    for (int i = 0; i < sol.size(); ++i) {
-        ASSERT_NEAR(sol[i], x[i], 1e-5);
-    }
+    EXPECT_NEAR_VECTORS(sol, x);
 }
