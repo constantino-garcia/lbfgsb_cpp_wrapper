@@ -1,7 +1,7 @@
 #ifndef L_BFGS_B_CPP_WRAPPER_TEST_FUNCTIONS_H
 #define L_BFGS_B_CPP_WRAPPER_TEST_FUNCTIONS_H
 
-#include "../../include/problem.h"
+#include <lbfgsb_cpp/problem.h>
 
 
 // See https://en.wikipedia.org/wiki/Test_functions_for_optimization for a complete list of numerical optimization tests

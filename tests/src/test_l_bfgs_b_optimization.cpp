@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "test_functions.h"
-#include "../../include/l_bfgs_b.h"
 #include "test_utils.h"
+#include <lbfgsb_cpp/l_bfgs_b.h>
 #include <vector>
 #include <armadillo>
 #include <Eigen/Dense>

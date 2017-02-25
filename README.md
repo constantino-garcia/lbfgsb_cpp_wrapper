@@ -6,9 +6,9 @@ bound-constrained optimization. It tries to be compatible with all king of moder
 [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) vectors.
 
 ## A quick example
-A simple example may be found under the `simple_example` folder. We give a short overview of the keys steps required to get your code running.
+A simple example may be found under the `examples` folder. We give a short overview of the keys steps required to get your code running.
 
-The files required to use the `l_bfgs_b` wrapper class are located under the *include* directory (C++ files) and the `Lbfgsb.3.0` directory (Fortran files). To specify the problem to be optimized you need to implement a tiny class extending the templated-class `problem`, which can be found under the `include` directory.
+The files required to use the `l_bfgs_b` wrapper class are located under the `include` directory (C++ files) and the `Lbfgsb.3.0` directory (Fortran files). To specify the problem to be optimized you need to implement a tiny class extending the templated-class `problem`, which can be found under the `include` directory.
 
 ```c++
 template<class T>
@@ -50,13 +50,14 @@ The optimization is then performed using the `l_bfgs_b` class:
 
 ```
 
-To run the code, it is necessary to link the Fortran files with the C++ files. Fortunately, it is possible to do it in a straightforward manner using `cmake`.
+To run the code, it is necessary to link the Fortran routines with the C++ files. Fortunately, it is possible to do it in a straightforward manner using `cmake`.
 
 ```bash
-cd simple_example
-cmake CMakeLists.txt 
+mkdir build
+cd build
+cmake ..
 make 
-./simple_example
+../bin/simple_example
 ```
 
 
@@ -68,8 +69,47 @@ A full example using all kind of vector-like containers is provided in `l_bfgs_b
 After the installation process, you can compile the example using `cmake`:
 
 ```bash
+# move to the same build directory as in the previous code chunk ...
+cd build
+# ... and clean it
+rm -rf *
 # change the installation path if needed
 export EIGEN3_INCLUDE_DIR="/usr/local/include/eigen3/"
-cmake CMakeLists.txt 
-make example
+cmake -DBUILD_SIMPLE_EX=off -DBUILD_FULL_EX=on ..
+make
+../bin/full_example 
+```
+
+## Install it and compile your code
+
+It is possible to use `cmake` to install the library and the required C++ headers:
+
+```bash
+cd build
+rm -rf *
+cmake ..
+# Installation requires root permissions
+sudo make install
+```
+
+If you don't have root permissions or you want to specify an installation folder you
+may use:
+
+```bash
+cd build
+rm -rf *
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/path/to/folder ..
+make install
+```
+
+After the installation, remember to add the shared-library folder to your `LD_LIBRARY_PATH` environment variable. It is possible now to compile your programs without `cmake`:
+
+```bash
+# Compile simple_example.cpp
+cd examples
+# change the path to your library if needed
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/usr/local/lib/lbfgsb_cpp"
+g++ simple_example.cpp -std=c++11 -llbfgsb_cpp -L/usr/local/lib/lbfgsb_cpp/ \
+    -o simple_example
+./simple_example
 ```

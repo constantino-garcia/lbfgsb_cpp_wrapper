@@ -1,8 +1,8 @@
 #include <iostream>
 #include <cmath>
 #include <array>
-#include "../include/problem.h"
-#include "../include/l_bfgs_b.h"
+#include <lbfgsb_cpp/problem.h>
+#include <lbfgsb_cpp/l_bfgs_b.h>
 
 using namespace std;
 
