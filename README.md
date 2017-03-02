@@ -113,3 +113,6 @@ g++ simple_example.cpp -std=c++11 -llbfgsb_cpp -L/usr/local/lib/lbfgsb_cpp/ \
     -o simple_example
 ./simple_example
 ```
+
+## License
+This project is licensed under the terms of the [MPL2.0](https://www.mozilla.org/en-US/MPL/2.0/) license.
