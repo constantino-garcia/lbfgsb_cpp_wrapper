@@ -9,6 +9,7 @@
 #define L_BFGS_B_CPP_WRAPPER_TEST_FUNCTIONS_H
 
 #include <lbfgsb_cpp/problem.h>
+#include <algorithm>
 
 
 // See https://en.wikipedia.org/wiki/Test_functions_for_optimization for a complete list of numerical optimization tests
@@ -33,16 +34,14 @@ public:
             throw std::invalid_argument("gradient size does not match input dimension");
         }
         // resize the gradient to avoid positive increments of the functions
-        // TODO: include in the l_bgsg_b solver
-        double epsilon = 1e-3;
-        gr[0] = epsilon * (400 * (std::pow(x[0], 3.0) - x[1] * x[0]) + 2 * (x[0] - 1));
+        gr[0] = (400 * (std::pow(x[0], 3.0) - x[1] * x[0]) + 2 * (x[0] - 1));
         for (int i = 1; i < (this->mInputDimension - 1); ++i) {
-            gr[i] = epsilon * (200 * (x[i] - std::pow(x[i - 1], 2.0)) +
-                               400 * (std::pow(x[i], 3.0) - x[i + 1] * x[i]) +
-                               2 * (x[i] - 1));
+            gr[i] = (200 * (x[i] - std::pow(x[i - 1], 2.0)) +
+                     400 * (std::pow(x[i], 3.0) - x[i + 1] * x[i]) +
+                     2 * (x[i] - 1));
         }
         gr[this->mInputDimension - 1] =
-                epsilon * (200 * (x[this->mInputDimension - 1] - std::pow(x[this->mInputDimension - 2], 2.0)));
+                (200 * (x[this->mInputDimension - 1] - std::pow(x[this->mInputDimension - 2], 2.0)));
     }
 };
 
@@ -64,13 +63,12 @@ public:
         if (gr.size() != this->mInputDimension) {
             throw std::invalid_argument("gradient size does not match input dimension");
         }
-        double epsilon = 1e-3;
-        gr[0] = epsilon * (2 * (1.5 - x[0] + x[0] * x[1]) * (-1 + x[1]) +
-                           2 * (2.25 - x[0] + x[0] * std::pow(x[1], 2)) * (-1 + std::pow(x[1], 2)) +
-                           2 * (2.625 - x[0] + x[0] * std::pow(x[1], 3)) * (-1 + std::pow(x[1], 3)));
-        gr[1] = epsilon * (2 * (1.5 - x[0] + x[0] * x[1]) * x[0] +
-                           2 * (2.25 - x[0] + x[0] * std::pow(x[1], 2)) * 2 * x[0] * x[1] +
-                           2 * (2.625 - x[0] + x[0] * std::pow(x[1], 3)) * 3 * x[0] * std::pow(x[1], 2));
+        gr[0] = (2 * (1.5 - x[0] + x[0] * x[1]) * (-1 + x[1]) +
+                 2 * (2.25 - x[0] + x[0] * std::pow(x[1], 2)) * (-1 + std::pow(x[1], 2)) +
+                 2 * (2.625 - x[0] + x[0] * std::pow(x[1], 3)) * (-1 + std::pow(x[1], 3)));
+        gr[1] = (2 * (1.5 - x[0] + x[0] * x[1]) * x[0] +
+                 2 * (2.25 - x[0] + x[0] * std::pow(x[1], 2)) * 2 * x[0] * x[1] +
+                 2 * (2.625 - x[0] + x[0] * std::pow(x[1], 3)) * 3 * x[0] * std::pow(x[1], 2));
     }
 };
 
@@ -95,7 +93,6 @@ public:
         }
         double x = xx[0];
         double y = xx[1];
-        double epsilon = 1e-3;
         // as output by wolfram alpha
         gr[0] = 24 * (8 * x * x * x - 4 * x * x * (9 * y + 4) + 6 * x * (9 * y * y + 8 * y + 1) -
                       9 * y * (3 * y * y + 4 * y + 1)) * ((3 * x * x + 2 * x * (3 * y - 7) + 3 * y * y - 14 * y + 19) *
@@ -108,8 +105,6 @@ public:
                 36 * (8 * x * x * x - 4 * x * x * (9 * y + 4) + 6 * x * (9 * y * y + 8 * y + 1) - 9 * y * (3 * y * y +
                                                                                                            4 * y + 1)) *
                 ((3 * x * x + 2 * x * (3 * y - 7) + 3 * y * y - 14 * y + 19) * std::pow(x + y + 1, 2) + 1);
-        gr[0] = epsilon * gr[0];
-        gr[1] = epsilon * gr[1];
     }
 };
 
@@ -128,9 +123,8 @@ public:
         if (gr.size() != this->mInputDimension) {
             throw std::invalid_argument("gradient size does not match input dimension");
         }
-        double epsilon = 1e-3;
-        gr[0] = epsilon * (2 * (x[0] + 2 * x[1] - 7) + 4 * (2 * x[0] + x[1] - 5));
-        gr[1] = epsilon * (4 * (x[0] + 2 * x[1] - 7) + 2 * (2 * x[0] + x[1] - 5));
+        gr[0] = (2 * (x[0] + 2 * x[1] - 7) + 4 * (2 * x[0] + x[1] - 5));
+        gr[1] = (4 * (x[0] + 2 * x[1] - 7) + 2 * (2 * x[0] + x[1] - 5));
     }
 };
 
@@ -156,26 +150,27 @@ public:
 };
 
 
-template <class T>
+template<class T>
 class simple_quadratic_problem : public problem<T> {
 public:
     simple_quadratic_problem(int inputDimension) : problem<T>(inputDimension) {}
 
-    simple_quadratic_problem(int inputDimension, const T& lb, const T& ub)
+    simple_quadratic_problem(int inputDimension, const T &lb, const T &ub)
             : problem<T>(inputDimension, lb, ub) {}
 
-    double operator()(const T& x) {
+    double operator()(const T &x) {
         return std::accumulate(std::begin(x), std::end(x), 0,
                                [](double acc, double value) {
                                    return acc + value * value;
                                });
     }
 
-    void gradient(const T& x, T& gr) {
+    void gradient(const T &x, T &gr) {
         std::transform(x.begin(), x.end(), gr.begin(),
                        [](double value) { return 2 * value; });
     }
 
 };
+
 #endif //L_BFGS_B_CPP_WRAPPER_TEST_FUNCTIONS_H
 

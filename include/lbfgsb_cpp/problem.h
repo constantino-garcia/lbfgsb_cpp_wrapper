@@ -10,6 +10,7 @@
 
 #include <array>
 #include <limits>
+#include <cmath>
 
 // Use the Curiosly repeating pattern to avoid code duplication
 template<typename T, typename derived>

@@ -84,6 +84,9 @@ TYPED_TEST(l_bfgs_b_test, beale) {
     TypeParam ub = this->fill_proper_container({4.5,4.5});
     func.set_lower_bound(lb);
     func.set_upper_bound(ub);
+    // scale gradient of beale function since it is explosive
+    // near the corners
+    this->mSolver.set_gradient_scaling_factor(1e-3);
     this->mSolver.optimize(func, x);
     EXPECT_NEAR_VECTORS(sol, x);
 

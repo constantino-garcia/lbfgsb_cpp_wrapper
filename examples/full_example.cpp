@@ -16,16 +16,6 @@
 using namespace std;
 
 int main() {
-    std::cout << "*** MINIMIZING BEALE (with std::array) ***" << std::endl;
-    beale_function<std::array<double, 2> > beale;
-    beale.set_lower_bound({-4.5, -4.5});
-    beale.set_upper_bound({4.5, 4.5});
-    l_bfgs_b<std::array<double, 2> > arraySolver(5);
-    arraySolver.set_verbose_level(-1);
-    std::array<double, 2> arrayX = {-1, 0};
-    arraySolver.optimize(beale, arrayX);
-    std::cout << "MINIMUM LOCATED AT : (" << arrayX[0] << ", " << arrayX[1] << ")" << std::endl << std::endl;
-
     std::cout << "*** MINIMIZING BOOTH (with std::vector) ***" << std::endl;
     booth_function<std::vector<double> > bl;
     bl.set_lower_bound({-2, -2});
@@ -35,6 +25,18 @@ int main() {
     std::vector<double> stdX = {-1, 2};
     stdSolver.optimize(bl, stdX);
     std::cout << "MINIMUM LOCATED AT : (" << stdX[0] << ", " << stdX[1] << ")" << std::endl << std::endl;
+
+    std::cout << "*** MINIMIZING BEALE (with std::array) ***" << std::endl;
+    beale_function<std::array<double, 2> > beale;
+    beale.set_lower_bound({-4.5, -4.5});
+    beale.set_upper_bound({4.5, 4.5});
+    l_bfgs_b<std::array<double, 2> > arraySolver(5);
+    arraySolver.set_verbose_level(-1);
+    // The Beale function has a explosive gradient near the corners... scale the gradient
+    arraySolver.set_gradient_scaling_factor(1e-2);
+    std::array<double, 2> arrayX = {-1, 0};
+    arraySolver.optimize(beale, arrayX);
+    std::cout << "MINIMUM LOCATED AT : (" << arrayX[0] << ", " << arrayX[1] << ")" << std::endl << std::endl;
 
     std::cout << "*** MINIMIZING GOLDSTEIN (with armadillo) ***" << std::endl;
     goldstein_price_function<arma::vec> gold;
