@@ -7,13 +7,12 @@
 
 #include "gtest/gtest.h"
 #include "test_functions.h"
+#include "test_utils.h"
 #include <armadillo>
 #include <Eigen/Dense>
 #include <initializer_list>
 #include <array>
 #include <vector>
-#include "test_utils.h"
-
 
 template <class T>
 class problem_test_base : public testing::Test {
@@ -86,7 +85,7 @@ TYPED_TEST(problem_test, constructor_invalid_dim) {
 
 TYPED_TEST(problem_test, constructor_valid_dim) {
     simple_quadratic_problem<TypeParam> pb= this->get_problem(3);
-    EXPECT_EQ(3, pb.getInputDimension());
+    EXPECT_EQ(3, pb.get_input_dimension());
 }
 
 

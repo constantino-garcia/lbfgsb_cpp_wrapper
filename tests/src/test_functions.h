@@ -5,21 +5,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef L_BFGS_B_CPP_WRAPPER_TEST_FUNCTIONS_H
-#define L_BFGS_B_CPP_WRAPPER_TEST_FUNCTIONS_H
+#ifndef LBFGSB_CPP_TEST_FUNCTIONS_H
+#define LBFGSB_CPP_TEST_FUNCTIONS_H
 
 #include <lbfgsb_cpp/problem.h>
 #include <algorithm>
 
 
 // See https://en.wikipedia.org/wiki/Test_functions_for_optimization for a complete list of numerical optimization tests
-
 template<class T>
-class rosenbrock_function : public problem<T> {
+class rosenbrock_function_base : public problem<T> {
 public:
-    rosenbrock_function(int n) : problem<T>(n) {};
+    rosenbrock_function_base(int inputDimension) : problem<T>(inputDimension) {}
 
-    virtual ~rosenbrock_function() = default;
+    virtual ~rosenbrock_function_base() = default;
 
     double operator()(const T &x) {
         double result = 0.0;
@@ -28,6 +27,16 @@ public:
         }
         return result;
     }
+
+
+};
+
+template<class T>
+class rosenbrock_function : public rosenbrock_function_base<T> {
+public:
+    rosenbrock_function(int inputDimension) : rosenbrock_function_base<T>(inputDimension) {}
+
+    ~rosenbrock_function() = default;
 
     void gradient(const T &x, T &gr) {
         if (gr.size() != this->mInputDimension) {
@@ -45,19 +54,26 @@ public:
     }
 };
 
-
 template<class T>
-class beale_function : public problem<T> {
+class beale_function_base : public problem<T> {
 public:
-    beale_function() : problem<T>(2) {};
+    beale_function_base() : problem<T>(2) {};
 
-    virtual ~beale_function() = default;
+    virtual ~beale_function_base() = default;
 
     double operator()(const T &x) {
         return std::pow(1.5 - x[0] + x[0] * x[1], 2) +
                std::pow(2.25 - x[0] + x[0] * std::pow(x[1], 2), 2) +
                std::pow(2.625 - x[0] + x[0] * std::pow(x[1], 3), 2);
     }
+};
+
+template<class T>
+class beale_function : public beale_function_base<T> {
+public:
+    beale_function() : beale_function_base<T>() {}
+
+    ~beale_function() = default;
 
     void gradient(const T &x, T &gr) {
         if (gr.size() != this->mInputDimension) {
@@ -72,13 +88,12 @@ public:
     }
 };
 
-
 template<class T>
-class goldstein_price_function : public problem<T> {
+class goldstein_price_function_base : public problem<T> {
 public:
-    goldstein_price_function() : problem<T>(2) {};
+    goldstein_price_function_base() : problem<T>(2) {};
 
-    virtual ~goldstein_price_function() = default;
+    virtual ~goldstein_price_function_base() = default;
 
     double operator()(const T &x) {
         return (1 + std::pow(x[0] + x[1] + 1, 2) *
@@ -86,6 +101,14 @@ public:
                (30 + std::pow(2 * x[0] - 3 * x[1], 2) *
                      (18 - 32 * x[0] + 12 * x[0] * x[0] + 48 * x[1] - 36 * x[0] * x[1] + 27 * x[1] * x[1]));
     }
+};
+
+template<class T>
+class goldstein_price_function : public goldstein_price_function_base<T> {
+public:
+    goldstein_price_function() : goldstein_price_function_base<T>() {}
+
+    ~goldstein_price_function() = default;
 
     void gradient(const T &xx, T &gr) {
         if (gr.size() != this->mInputDimension) {
@@ -109,15 +132,25 @@ public:
 };
 
 template<class T>
-class booth_function : public problem<T> {
+class booth_function_base : public problem<T> {
 public:
-    booth_function() : problem<T>(2) {};
+    booth_function_base() : problem<T>(2) {};
 
-    virtual ~booth_function() = default;
+    virtual ~booth_function_base() = default;
 
     double operator()(const T &x) {
         return std::pow(x[0] + 2 * x[1] - 7, 2) + std::pow(2 * x[0] + x[1] - 5, 2);
     }
+
+
+};
+
+template<class T>
+class booth_function : public booth_function_base<T> {
+public:
+    booth_function() : booth_function_base<T>() {}
+
+    ~booth_function() = default;
 
     void gradient(const T &x, T &gr) {
         if (gr.size() != this->mInputDimension) {
@@ -128,17 +161,26 @@ public:
     }
 };
 
-
 template<class T>
-class matyas_function : public problem<T> {
+class matyas_function_base : public problem<T> {
 public:
-    matyas_function() : problem<T>(2) {};
+    matyas_function_base() : problem<T>(2) {};
 
-    virtual ~matyas_function() = default;
+    virtual ~matyas_function_base() = default;
 
     double operator()(const T &x) {
         return 0.26 * (x[0] * x[0] + x[1] * x[1]) - 0.48 * x[0] * x[1];
     }
+
+
+};
+
+template<class T>
+class matyas_function : public matyas_function_base<T> {
+public:
+    matyas_function() : matyas_function_base<T>() {}
+
+    ~matyas_function() = default;
 
     void gradient(const T &x, T &gr) {
         if (gr.size() != this->mInputDimension) {
@@ -149,13 +191,12 @@ public:
     }
 };
 
-
 template<class T>
-class simple_quadratic_problem : public problem<T> {
+class simple_quadratic_problem_base : public problem<T> {
 public:
-    simple_quadratic_problem(int inputDimension) : problem<T>(inputDimension) {}
+    simple_quadratic_problem_base(int inputDimension) : problem<T>(inputDimension) {}
 
-    simple_quadratic_problem(int inputDimension, const T &lb, const T &ub)
+    simple_quadratic_problem_base(int inputDimension, const T &lb, const T &ub)
             : problem<T>(inputDimension, lb, ub) {}
 
     double operator()(const T &x) {
@@ -164,13 +205,23 @@ public:
                                    return acc + value * value;
                                });
     }
+};
+
+template<class T>
+class simple_quadratic_problem : public simple_quadratic_problem_base<T> {
+public:
+    simple_quadratic_problem(int inputDimension) : simple_quadratic_problem_base<T>(inputDimension) {}
+
+    simple_quadratic_problem(int inputDimension, const T &lb, const T &ub)
+            : simple_quadratic_problem_base<T>(inputDimension, lb, ub) {}
+
+    ~simple_quadratic_problem() = default;
 
     void gradient(const T &x, T &gr) {
         std::transform(x.begin(), x.end(), gr.begin(),
                        [](double value) { return 2 * value; });
     }
-
 };
 
-#endif //L_BFGS_B_CPP_WRAPPER_TEST_FUNCTIONS_H
+#endif //LBFGSB_CPP_TEST_FUNCTIONS_H
 

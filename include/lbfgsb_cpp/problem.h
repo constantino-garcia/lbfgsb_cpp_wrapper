@@ -5,12 +5,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef LBFGSB_ADAPTER_PROBLEM_H
-#define LBFGSB_ADAPTER_PROBLEM_H
+#ifndef LBFGSB_CPP_PROBLEM_H
+#define LBFGSB_CPP_PROBLEM_H
 
 #include <array>
 #include <limits>
 #include <cmath>
+#include <initializer_list>
+#include "utils.h"
 
 // Use the Curiosly repeating pattern to avoid code duplication
 template<typename T, typename derived>
@@ -32,7 +34,7 @@ public:
 
     virtual ~problem_base() = default;
 
-    int getInputDimension() const {
+    int get_input_dimension() const {
         return mInputDimension;
     }
 
@@ -46,6 +48,12 @@ public:
         mLowerBound = lowerBound;
     }
 
+    void set_lower_bound(const std::initializer_list<double>& lowerBound) {
+        T lowerBoundContainer;
+        l_bfgs_b_utils::fill_container(lowerBoundContainer, lowerBound);
+        set_lower_bound(lowerBoundContainer);
+    }
+
     T get_upper_bound() const {
         return mUpperBound;
     }
@@ -56,9 +64,24 @@ public:
         mUpperBound = upperBound;
     }
 
+    void set_upper_bound(const std::initializer_list<double>& upperBound) {
+        T upperBoundContainer;
+        l_bfgs_b_utils::fill_container(upperBoundContainer, upperBound);
+        set_upper_bound(upperBoundContainer);
+    }
+
     virtual double operator()(const T &x) = 0;
 
-    virtual void gradient(const T &x, T &gr) = 0;
+    virtual void gradient(const T& x, T& gr)  {
+        numerical_gradient(x, gr);
+    };
+
+    void numerical_gradient(const T& x, T& gr, double gridSpacing = 1e-3) {
+        if (x.size() != mInputDimension) {
+            throw std::invalid_argument("x size does not match the problem's input dimension");
+        }
+        gr = l_bfgs_b_utils::numerical_gradient((*this), x, mLowerBound, mUpperBound, gridSpacing);
+    }
 
 protected:
     int mInputDimension;
@@ -138,4 +161,4 @@ public:
     }
 };
 
-#endif //LBFGSB_ADAPTER_PROBLEM_H
+#endif //LBFGSB_CPP_PROBLEM_H

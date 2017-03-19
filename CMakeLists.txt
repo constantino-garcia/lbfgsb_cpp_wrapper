@@ -40,3 +40,6 @@ ENDIF()
 IF (BUILD_SIMPLE_EX OR BUILD_FULL_EX)
     add_subdirectory(examples)
 ENDIF()
+
+
+add_executable(main main.cpp)

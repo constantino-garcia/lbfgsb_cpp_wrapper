@@ -8,110 +8,132 @@
 #include "gtest/gtest.h"
 #include "test_functions.h"
 #include "test_utils.h"
+#include "problem_fixture.h"
 #include <lbfgsb_cpp/l_bfgs_b.h>
+#include <lbfgsb_cpp/utils.h>
 #include <vector>
 #include <armadillo>
 #include <Eigen/Dense>
-#include <initializer_list>
 #include <array>
 
-// Define a test fixture class template that creates the proper
-// solver and auxiliar containers for the initial point, the solution and
-// the bounds
 template<class T>
-class l_bfgs_b_test : public testing::Test {
-protected:
-    // set solvers to work with high-accuracy
-    l_bfgs_b_test() : mSolver(l_bfgs_b<T>(5, 5000, 1e1, 1e-12) ){}
+class l_bfgs_b_num_gradient_test : public problem_fixture<T> {
+public:
+    l_bfgs_b_num_gradient_test() {
+        mSolver.set_machine_precision_factor(10);
+        mSolver.set_projected_gradient_tolerance(0);
+        mSolver.set_max_iterations(1000);
+    }
 
-    ~l_bfgs_b_test() = default;
+    ~l_bfgs_b_num_gradient_test() = default;
 
-    // Need this method due to that Eigen does not accept init-list (to the best of my knowledge)
-    T fill_proper_container(const std::initializer_list<double>& initList) {
-        int n = initList.size();
-        T x(n);
-        auto it = initList.begin();
-        for (int i = 0; i < n; i++, it++) {
-           x[i] = *it;
+    void test_optimization(const std::initializer_list<double> &solution) {
+        T x, sol;
+        l_bfgs_b_utils::fill_container(sol, solution);
+        for (int i = 0; i < mNoTests; i++) {
+            this->random_point(x);
+            this->mSolver.optimize(*(this->mPb), x);
+            EXPECT_NEAR_VECTORS(sol, x, mTolerance);
         }
-        return x;
     }
 
-    l_bfgs_b<T> mSolver;
-};
-
-
-template<class U, std::size_t N>
-class l_bfgs_b_test< std::array<U,N> > : public testing::Test {
 protected:
-    l_bfgs_b_test() : mSolver(l_bfgs_b< std::array<U,N> >()) {}
-
-    ~l_bfgs_b_test() = default;
-
-    std::array<U, N> fill_proper_container(const std::initializer_list<double>& initList) {
-        assert(N == initList.size());
-        std::array<U, N> x;
-        std::copy(initList.begin(), initList.end(), std::begin(x));
-        return x;
-    }
-
-    l_bfgs_b< std::array<U,N> > mSolver;
+    l_bfgs_b<T> mSolver;
+    int mNoTests = 100;
+    double mTolerance = 1e-3;
 };
+
 
 using testing::Types;
-typedef Types<std::vector<double>, arma::vec, Eigen::VectorXd, std::array<double, 2> > Implementations;
+typedef Types<std::vector<double>, arma::vec, arma::colvec, Eigen::RowVectorXd,
+        Eigen::VectorXd, std::array<double, 2> > Implementations;
+TYPED_TEST_CASE(l_bfgs_b_num_gradient_test, Implementations);
 
-TYPED_TEST_CASE(l_bfgs_b_test, Implementations);
-
-TYPED_TEST(l_bfgs_b_test, rosenbrock) {
+TYPED_TEST(l_bfgs_b_num_gradient_test, rosenbrock) {
     int n = 2;
-    rosenbrock_function<TypeParam> func(n);
-    TypeParam x = this->fill_proper_container({-1,2});
-    TypeParam sol = this->fill_proper_container({1,1});
-    TypeParam lb = this->fill_proper_container({-10,-10});
-    TypeParam ub = this->fill_proper_container({10,10});
-    func.set_lower_bound(lb);
-    func.set_upper_bound(ub);
-    this->mSolver.optimize(func, x);
-    EXPECT_NEAR_VECTORS(sol, x);
+    std::shared_ptr<problem<TypeParam> > ptr(new rosenbrock_function<TypeParam>(n));
+    ptr->set_lower_bound({-10, -10});
+    ptr->set_upper_bound({10, 10});
+    this->set_up(ptr);
+    this->test_optimization({1, 1});
 }
 
-TYPED_TEST(l_bfgs_b_test, beale) {
-    beale_function<TypeParam> func;
-    TypeParam x = this->fill_proper_container({-1,0});
-    TypeParam sol = this->fill_proper_container({3,0.5});
-    TypeParam lb = this->fill_proper_container({-4.5,-4.5});
-    TypeParam ub = this->fill_proper_container({4.5,4.5});
-    func.set_lower_bound(lb);
-    func.set_upper_bound(ub);
-    // scale gradient of beale function since it is explosive
-    // near the corners
-    this->mSolver.set_gradient_scaling_factor(1e-3);
-    this->mSolver.optimize(func, x);
-    EXPECT_NEAR_VECTORS(sol, x);
-
+TYPED_TEST(l_bfgs_b_num_gradient_test, rosenbrock_numerical_gradient) {
+    int n = 2;
+    std::shared_ptr<problem<TypeParam> > ptr(new rosenbrock_function_base<TypeParam>(n));
+    ptr->set_lower_bound({-10, -10});
+    ptr->set_upper_bound({10, 10});
+    this->set_up(ptr);
+    this->test_optimization({1, 1});
 }
 
-TYPED_TEST(l_bfgs_b_test, booth) {
-    booth_function<TypeParam> func;
-    TypeParam x = this->fill_proper_container({8, 9.7});
-    TypeParam sol = this->fill_proper_container({1, 3});
-    TypeParam lb = this->fill_proper_container({-10, -10});
-    TypeParam ub = this->fill_proper_container({10, 10});
-    func.set_lower_bound(lb);
-    func.set_upper_bound(ub);
-    this->mSolver.optimize(func, x);
-    EXPECT_NEAR_VECTORS(sol, x);
+// some initial points of beale function do not converge to the global minimum
+// (tested with R's L-BFGS_B implementations). Restrict the searching domain to
+// avoid this issue.
+TYPED_TEST(l_bfgs_b_num_gradient_test, beale) {
+    std::shared_ptr<problem<TypeParam> > ptr(new beale_function<TypeParam>());
+    ptr->set_lower_bound({0, -2});
+    ptr->set_upper_bound({4.5, 1});
+    this->set_up(ptr);
+    this->test_optimization({3, 0.5});
 }
 
-TYPED_TEST(l_bfgs_b_test, matyas) {
-    matyas_function<TypeParam> func;
-    TypeParam x = this->fill_proper_container({8,-9.7});
-    TypeParam sol = this->fill_proper_container({0,0});
-    TypeParam lb = this->fill_proper_container({-10,-10});
-    TypeParam ub = this->fill_proper_container({10,10});
-    func.set_lower_bound(lb);
-    func.set_upper_bound(ub);
-    this->mSolver.optimize(func, x);
-    EXPECT_NEAR_VECTORS(sol, x);
+TYPED_TEST(l_bfgs_b_num_gradient_test, beale_numerical_gradient) {
+    std::shared_ptr<problem<TypeParam> > ptr(new beale_function_base<TypeParam>());
+    ptr->set_lower_bound({0, -2});
+    ptr->set_upper_bound({4.5, 1});
+    this->set_up(ptr);
+    this->test_optimization({3, 0.5});
 }
+
+TYPED_TEST(l_bfgs_b_num_gradient_test, booth) {
+    std::shared_ptr<problem<TypeParam> > ptr(new booth_function<TypeParam>());
+    ptr->set_lower_bound({-10, -10});
+    ptr->set_upper_bound({10, 10});
+    this->set_up(ptr);
+    this->test_optimization({1, 3});
+}
+
+TYPED_TEST(l_bfgs_b_num_gradient_test, booth_numerical_gradient) {
+    std::shared_ptr<problem<TypeParam> > ptr(new booth_function_base<TypeParam>());
+    ptr->set_lower_bound({-10, -10});
+    ptr->set_upper_bound({10, 10});
+    this->set_up(ptr);
+    this->test_optimization({1, 3});
+}
+
+TYPED_TEST(l_bfgs_b_num_gradient_test, matyas) {
+    std::shared_ptr<problem<TypeParam> > ptr(new matyas_function<TypeParam>());
+    ptr->set_lower_bound({-10, -10});
+    ptr->set_upper_bound({10, 10});
+    this->set_up(ptr);
+    this->test_optimization({0, 0});
+}
+
+TYPED_TEST(l_bfgs_b_num_gradient_test, matyas_numerical_gradient) {
+    std::shared_ptr<problem<TypeParam> > ptr(new matyas_function_base<TypeParam>());
+    ptr->set_lower_bound({-10, -10});
+    ptr->set_upper_bound({10, 10});
+    this->set_up(ptr);
+    this->test_optimization({0, 0});
+}
+
+
+// goldstein function has several local minima: restrict the search space to find the
+// global minimum
+TYPED_TEST(l_bfgs_b_num_gradient_test, goldstein) {
+    std::shared_ptr<problem<TypeParam> > ptr(new goldstein_price_function<TypeParam>());
+    ptr->set_lower_bound({-2, -2});
+    ptr->set_upper_bound({2, -0.75});
+    this->set_up(ptr);
+    this->test_optimization({0, -1});
+}
+
+TYPED_TEST(l_bfgs_b_num_gradient_test, goldstein_numerical_gradient) {
+    std::shared_ptr<problem<TypeParam> > ptr(new goldstein_price_function_base<TypeParam>());
+    ptr->set_lower_bound({-2, -2});
+    ptr->set_upper_bound({2, -0.75});
+    this->set_up(ptr);
+    this->test_optimization({0, -1});
+}
+

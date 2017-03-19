@@ -5,8 +5,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef L_BFGS_B_CPP_WRAPPER_H
-#define L_BFGS_B_CPP_WRAPPER_H
+#ifndef LBFGSB_CPP_WRAPPER_H
+#define LBFGSB_CPP_WRAPPER_H
 
 #include <cassert>
 #include "problem.h"
@@ -103,7 +103,7 @@ public:
     }
 
     void optimize(problem<T> &pb, T &x0) {
-        int n = pb.getInputDimension();
+        int n = pb.get_input_dimension();
         // prepare variables for the algorithm
         std::vector<double> mLowerBound(n);
         std::vector<double> mUpperBound(n);
@@ -224,4 +224,4 @@ private:
 };
 
 
-#endif //L_BFGS_B_CPP_WRAPPER_H
+#endif //LBFGSB_CPP_WRAPPER_H
